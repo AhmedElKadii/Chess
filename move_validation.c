@@ -31,19 +31,37 @@ bool validateBlackPawn(Piece piece, Piece dest) {
 
 bool validateRook(Piece piece, Piece dest) {
     if (piece.position.x == dest.position.x) {
-        for (int y = piece.position.y + 1; y < dest.position.y; y++) {
-			Piece currPiece = getPiece((vector2) {piece.position.x, y});
-            if (!isEmpty(currPiece)) return false;
-			currPiece.isValidMove = true;
+        if (piece.position.y < dest.position.y) {
+            for (int y = piece.position.y + 1; y < dest.position.y; y++) {
+                Piece currPiece = getPiece((vector2) {piece.position.x, y});
+                if (!isEmpty(currPiece)) return false;
+                board[piece.position.x][y].isValidMove = true;
+            }
+        }
+        else if (piece.position.y > dest.position.y) {
+            for (int y = piece.position.y - 1; y > dest.position.y; y--) {
+                Piece currPiece = getPiece((vector2) {piece.position.x, y});
+                if (!isEmpty(currPiece)) return false;
+                board[piece.position.x][y].isValidMove = true;
+            }
         }
         return dest.color != piece.color;
     } else if (piece.position.y == dest.position.y) {
-        for (int x = piece.position.x + 1; x < dest.position.x; x++) {
-			Piece currPiece = getPiece((vector2) {x, piece.position.y});
-			if (!isEmpty(currPiece)) return false;
-			currPiece.isValidMove = true;
+        if (piece.position.x < dest.position.x) {
+            for (int x = piece.position.x + 1; x < dest.position.x; x++) {
+                Piece currPiece = getPiece((vector2) {x, piece.position.y});
+                if (!isEmpty(currPiece)) return false;
+                board[x][piece.position.y].isValidMove = true;
+            }
         }
-		return true;
+        else if (piece.position.x > dest.position.x) {
+            for (int x = piece.position.x - 1; x > dest.position.x; x--) {
+                Piece currPiece = getPiece((vector2) {x, piece.position.y});
+                if (!isEmpty(currPiece)) return false;
+                board[x][piece.position.y].isValidMove = true;
+            }
+        }
+        return dest.color != piece.color;
     }
     return false;
 }
@@ -68,6 +86,21 @@ bool validateBishop(Piece piece, Piece dest) {
 	return false;
 }
 
+bool validateQueen(Piece piece, Piece dest) {
+	return validateRook(piece, dest) || validateBishop(piece, dest);
+}
+
+bool validateKnight(Piece piece, Piece dest) {
+	if (abs(piece.position.x - dest.position.x) == 2 && abs(piece.position.y - dest.position.y) == 1) return true;
+	if (abs(piece.position.x - dest.position.x) == 1 && abs(piece.position.y - dest.position.y) == 2) return true;
+	return false;
+}
+
+bool validateKing(Piece piece, Piece dest) {
+	if (abs(piece.position.x - dest.position.x) <= 1 && abs(piece.position.y - dest.position.y) <= 1) return true;
+	return false;
+}
+
 void resetValidity() {
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
@@ -80,8 +113,6 @@ bool isValidMove(vector2 from, vector2 to) {
     Piece piece = getPiece(from);
     Piece dest = getPiece(to);
 
-	/*resetValidity();*/
-
     if (piece.color == dest.color) return false;
 
     switch (piece.name) {
@@ -93,6 +124,12 @@ bool isValidMove(vector2 from, vector2 to) {
             return validateRook(piece, dest);
 		case 'b':
 			return validateBishop(piece, dest);
+		case 'q':
+			return validateQueen(piece, dest);
+		case 'n':
+			return validateKnight(piece, dest);
+		case 'k':
+			return validateKing(piece, dest);
 		default:
 			break;
     }
