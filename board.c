@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include <ctype.h>
 
 #include "board.h"
 #include "move_validation.h"
+#include "piece.h"
 
 void createBoard() {
     board[0][7] = createPiece('r', 'w', 0, 7);
@@ -39,14 +39,23 @@ void createBoard() {
 void displayBoard() {
     printf("\n  a b c d e f g h\n");
     for (int y = 0; y < SIZE; y++) {
-        printf("%d ", SIZE - y); // row label (numbers 1-8)
+        printf("%d ", SIZE - y);
         for (int x = 0; x < SIZE; x++) {
-            if (!isEmpty(board[x][y]) && board[x][y].color == 'w') {
-                printf("%c ", board[x][y].name); // white pieces
+			if (!isEmpty(board[x][y]) && board[x][y].color == 'w') {
+				if (equals((vector2) {x,y}, selected_piece) && HIGHLIGHT) {
+					printf("\033[033m%c \033[0m", board[x][y].name);
+				} else if (board[x][y].isValidMove && HIGHLIGHT) {
+					printf("\033[032m%c \033[0m", board[x][y].name);
+				} else printf("%c ", board[x][y].name);
             } else if (!isEmpty(board[x][y]) && board[x][y].color == 'b') {
-                printf("%c ", toupper(board[x][y].name)); // black pieces
-			} else if (isEmpty(board[x][y]) && board[x][y].isValidMove) {
-				printf("* ");
+				if (equals((vector2) {x,y}, selected_piece) && HIGHLIGHT) {
+					printf("\033[033m%c \033[0m", toupper(board[x][y].name));
+				} else if (board[x][y].isValidMove && HIGHLIGHT) {
+					printf("\033[032m%c \033[0m", toupper(board[x][y].name));
+				} else printf("%c ", toupper(board[x][y].name));
+			} else if (isEmpty(board[x][y]) && board[x][y].isValidMove && SHOW_MOVES) {
+				if (HIGHLIGHT)	printf("\033[33m* \033[0m");
+				else	printf("* ");
             } else {
                 printf("  ");
             }
@@ -60,8 +69,16 @@ Piece getPiece(vector2 pos) {
     return board[pos.x][pos.y]; // x first, then y
 }
 
-void movePiece(Piece piece, vector2 pos) {
+Piece* getPieceAsPointer(vector2 pos) {
+    return &board[pos.x][pos.y]; // x first, then y
+}
+
+void capturePiece(Piece piece) {
     board[piece.position.x][piece.position.y] = createPiece(' ', ' ', piece.position.x, piece.position.y);
+}
+
+void movePiece(Piece piece, vector2 pos) {
+	capturePiece(piece);
 
     int xDiff = pos.x - piece.position.x;
     int yDiff = pos.y - piece.position.y;
@@ -71,6 +88,9 @@ void movePiece(Piece piece, vector2 pos) {
 
 	int Diff = xDiff == yDiff ? xDiff : xDiff != 0 ? xDiff : yDiff;
 
+	if (lastMovedPiece != NULL) lastMovedPiece->lastMove = 0;
+	lastMovedPiece = &piece;
+
     piece.totalMoves += abs(Diff);
     piece.lastMove = abs(Diff);
 
@@ -78,6 +98,7 @@ void movePiece(Piece piece, vector2 pos) {
 }
 
 void init() {
+	selected_piece = (vector2) {-1,-1};
     createBoard();
     displayBoard();
 }

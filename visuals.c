@@ -5,7 +5,7 @@ void displayMoves(Piece piece) {
         for (int x = 0; x < SIZE; x++) {
             vector2 pos = {x, y};
 
-            if (isValidMove(piece.position, pos)) {
+            if (isValidMove(piece.position, pos, false)) {
                 board[x][y].isValidMove = true;
             }
         }

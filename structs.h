@@ -11,12 +11,5 @@ typedef struct {
     int y; // Y coordinate
 } vector2;
 
-// Struct for a string (dynamic character array)
-typedef struct {
-    char *data;   // Pointer to the character array
-    size_t length; // Length of the string
-} string;
-
 vector2 new_vector2(int x, int y);
-string new_string(const char *initialData);
-void free_string(string *str);
+bool equals(vector2 v1, vector2 v2);

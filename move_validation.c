@@ -1,21 +1,95 @@
 #include "move_validation.h"
+#include "board.h"
 
 bool isEmpty(Piece piece) {
 	return piece.name == ' ';
 }
 
-bool validateWhitePawn(Piece piece, Piece dest) {
+bool canCapture(Piece piece, Piece dest) {
+	return piece.color != dest.color || isEmpty(dest);
+}
+
+bool validateWhitePawn(Piece piece, Piece dest, bool capture) {
+	// en passant
+	Piece* right = getPieceAsPointer((vector2){piece.position.x + 1, piece.position.y});
+	if (right != NULL && right->lastMove == 2 && piece.position.x + 1 == dest.position.x && piece.position.y - 1 == dest.position.y) {
+		right->isValidMove = true;
+		dest.isValidMove = true;
+		if (canCapture(piece, dest) && isEmpty(dest) == true) {
+			if (capture) capturePiece(*right);
+			return true;
+		}
+		else return false;
+	}
+	Piece* left = getPieceAsPointer((vector2){piece.position.x - 1, piece.position.y});
+	if (left != NULL && left->lastMove == 2 && piece.position.x - 1 == dest.position.x && piece.position.y - 1 == dest.position.y) {
+		left->isValidMove = true;
+		dest.isValidMove = true;
+		if (canCapture(piece, dest) && isEmpty(dest) == true) {
+			if (capture) capturePiece(*left);
+			return true;
+		}
+		else return false;
+	}
+    if (piece.position.x - 1 == dest.position.x && piece.position.y - 1 == dest.position.y) {
+		Piece pos = getPiece((vector2) {piece.position.x-1, piece.position.y-1});
+		pos.isValidMove = true;
+		dest.isValidMove = true;
+		return canCapture(piece, dest) && !isEmpty(dest);
+	}
+    if (piece.position.x + 1 == dest.position.x && piece.position.y - 1 == dest.position.y) {
+		Piece pos = getPiece((vector2) {piece.position.x+1, piece.position.y-1});
+		pos.isValidMove = true;
+		dest.isValidMove = true;
+		return canCapture(piece, dest) && !isEmpty(dest);
+	}
     if (piece.position.x == dest.position.x && piece.position.y - 1 == dest.position.y && isEmpty(dest)) {
+		dest.isValidMove = true;
 		return true;
 	}
     if (piece.position.x == dest.position.x && piece.position.y - 2 == dest.position.y && piece.totalMoves == 0 && isEmpty(dest)) {
 		Piece prev = getPiece((vector2) {dest.position.x, dest.position.y + 1});
+		prev.isValidMove = true;
+		dest.isValidMove = true;
 		return true;
 	}
     return false;
 }
 
-bool validateBlackPawn(Piece piece, Piece dest) {
+bool validateBlackPawn(Piece piece, Piece dest, bool capture) {
+	// en passant
+	Piece* right = getPieceAsPointer((vector2){piece.position.x + 1, piece.position.y});
+	if (right != NULL && right->lastMove == 2 && piece.position.x + 1 == dest.position.x && piece.position.y + 1 == dest.position.y) {
+		right->isValidMove = true;
+		dest.isValidMove = true;
+		if (canCapture(piece, dest) && isEmpty(dest) == true) {
+			if (capture) capturePiece(*right);
+			return true;
+		}
+		else return false;
+	}
+	Piece* left = getPieceAsPointer((vector2){piece.position.x - 1, piece.position.y});
+	if (left != NULL && left->lastMove == 2 && piece.position.x - 1 == dest.position.x && piece.position.y + 1 == dest.position.y) {
+		left->isValidMove = true;
+		dest.isValidMove = true;
+		if (canCapture(piece, dest) && isEmpty(dest) == true) {
+			if (capture) capturePiece(*left);
+			return true;
+		}
+		else return false;
+	}
+    if (piece.position.x - 1 == dest.position.x && piece.position.y + 1 == dest.position.y) {
+		Piece pos = getPiece((vector2) {piece.position.x-1, piece.position.y+1});
+		pos.isValidMove = true;
+		dest.isValidMove = true;
+		return canCapture(piece, dest) && !isEmpty(dest);
+	}
+    if (piece.position.x + 1 == dest.position.x && piece.position.y - 1 == dest.position.y) {
+		Piece pos = getPiece((vector2) {piece.position.x+1, piece.position.y+1});
+		pos.isValidMove = true;
+		dest.isValidMove = true;
+		return canCapture(piece, dest) && !isEmpty(dest);
+	}
     if (piece.position.x == dest.position.x && piece.position.y + 1 == dest.position.y && isEmpty(dest)) {
 		dest.isValidMove = true;
 		return true;
@@ -45,7 +119,7 @@ bool validateRook(Piece piece, Piece dest) {
                 board[piece.position.x][y].isValidMove = true;
             }
         }
-        return dest.color != piece.color;
+        return canCapture(piece, dest);
     } else if (piece.position.y == dest.position.y) {
         if (piece.position.x < dest.position.x) {
             for (int x = piece.position.x + 1; x < dest.position.x; x++) {
@@ -61,7 +135,7 @@ bool validateRook(Piece piece, Piece dest) {
                 board[x][piece.position.y].isValidMove = true;
             }
         }
-        return dest.color != piece.color;
+        return canCapture(piece, dest);
     }
     return false;
 }
@@ -81,7 +155,7 @@ bool validateBishop(Piece piece, Piece dest) {
 			Piece currPiece = getPiece((vector2) {x, y});
 			if (!isEmpty(currPiece)) return false;
 		}
-		return true;
+		return canCapture(piece, dest);
 	}
 	return false;
 }
@@ -91,13 +165,13 @@ bool validateQueen(Piece piece, Piece dest) {
 }
 
 bool validateKnight(Piece piece, Piece dest) {
-	if (abs(piece.position.x - dest.position.x) == 2 && abs(piece.position.y - dest.position.y) == 1) return true;
-	if (abs(piece.position.x - dest.position.x) == 1 && abs(piece.position.y - dest.position.y) == 2) return true;
+	if (abs(piece.position.x - dest.position.x) == 2 && abs(piece.position.y - dest.position.y) == 1) return canCapture(piece, dest);
+	if (abs(piece.position.x - dest.position.x) == 1 && abs(piece.position.y - dest.position.y) == 2) return canCapture(piece, dest);
 	return false;
 }
 
 bool validateKing(Piece piece, Piece dest) {
-	if (abs(piece.position.x - dest.position.x) <= 1 && abs(piece.position.y - dest.position.y) <= 1) return true;
+	if (abs(piece.position.x - dest.position.x) <= 1 && abs(piece.position.y - dest.position.y) <= 1) return canCapture(piece, dest);
 	return false;
 }
 
@@ -109,7 +183,7 @@ void resetValidity() {
 	}
 }
 
-bool isValidMove(vector2 from, vector2 to) {
+bool isValidMove(vector2 from, vector2 to, bool capture) {
     Piece piece = getPiece(from);
     Piece dest = getPiece(to);
 
@@ -117,8 +191,8 @@ bool isValidMove(vector2 from, vector2 to) {
 
     switch (piece.name) {
         case 'p':
-            if (piece.color == 'w') return validateWhitePawn(piece, dest);
-            if (piece.color == 'b') return validateBlackPawn(piece, dest);
+            if (piece.color == 'w') return validateWhitePawn(piece, dest, capture);
+            if (piece.color == 'b') return validateBlackPawn(piece, dest, capture);
             break;
         case 'r':
             return validateRook(piece, dest);

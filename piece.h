@@ -7,7 +7,6 @@ typedef struct {
 	char name;
 	char color;
 	vector2 position;
-	bool isAlive;
 	int lastMove;
 	int totalMoves;
 	bool isValidMove;
