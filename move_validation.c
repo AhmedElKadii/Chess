@@ -141,23 +141,25 @@ bool validateRook(Piece piece, Piece dest) {
 }
 
 bool validateBishop(Piece piece, Piece dest) {
-	if (abs(piece.position.x - dest.position.x) == abs(piece.position.y - dest.position.y)) {
-		int x = piece.position.x;
-		int y = piece.position.y;
+    if (abs(piece.position.x - dest.position.x) == abs(piece.position.y - dest.position.y)) {
+        int xDir = (dest.position.x > piece.position.x) ? 1 : -1;
+        int yDir = (dest.position.y > piece.position.y) ? 1 : -1;
 
-		while (x != dest.position.x && y != dest.position.y) {
-			if (x < dest.position.x) x++;
-			else x--;
+        int x = piece.position.x + xDir;
+        int y = piece.position.y + yDir;
 
-			if (y < dest.position.y) y++;
-			else y--;
+        while (x != dest.position.x && y != dest.position.y) {
+            Piece currPiece = getPiece((vector2) {x, y});
+            if (!isEmpty(currPiece)) return false;
+            board[x][y].isValidMove = true;
 
-			Piece currPiece = getPiece((vector2) {x, y});
-			if (!isEmpty(currPiece)) return false;
-		}
-		return canCapture(piece, dest);
-	}
-	return false;
+            x += xDir;
+            y += yDir;
+        }
+
+        return canCapture(piece, dest);
+    }
+    return false;
 }
 
 bool validateQueen(Piece piece, Piece dest) {

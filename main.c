@@ -6,27 +6,28 @@
 void gameLoop() {
     char move[3];
     while (1) {
-        printf("Enter your move (e.g., E2, d5): ");
+        printf("\nEnter your move, %s (e.g., E2, d5): ", turn == 'w' ? "White" : "Black");
         scanf("%s", move);
 
-		int x = tolower(move[0]) - 'a';  // Convert 'a' to 0, 'b' to 1, etc.
-		int y = SIZE - (move[1] - '0');  // Convert '1' to SIZE-1, '2' to SIZE-2, etc.
+		int x = tolower(move[0]) - 'a';
+		int y = SIZE - (move[1] - '0');
 
-		// Check if x is out of bounds (less than 0 or greater than SIZE-1)
 		if (x < 0 || x >= SIZE) {
-			x = -1;  // Set to -1 if out of bounds
+			x = -1;
 		}
 
-		// Check if y is out of bounds (less than 0 or greater than SIZE-1)
 		if (y < 0 || y >= SIZE) {
-			y = -1;  // Set to -1 if out of bounds
+			y = -1;
 		}
 
         vector2 pos = new_vector2(x, y);
         Piece piece = getPiece(pos);
 
         if (!isEmpty(piece) && y != -1 && x != -1) {
-            printf("\nPiece at position: %c\n", piece.name);
+			if (piece.color == turn) printf("\nPiece at position: %c\n", piece.name); else {
+				printf("\nInvalid move. It's not your turn.\n");
+				continue;
+			}
         } else {
 			resetValidity();
 			selected_piece = (vector2) {-1, -1};
@@ -45,25 +46,44 @@ void gameLoop() {
         x = tolower(move[0]) - 'a';
         y = SIZE - (move[1] - '0');
 
-		// Check if x is out of bounds (less than 0 or greater than SIZE-1)
 		if (x < 0 || x >= SIZE) {
-			x = -1;  // Set to -1 if out of bounds
+			x = -1;
 		}
 
-		// Check if y is out of bounds (less than 0 or greater than SIZE-1)
 		if (y < 0 || y >= SIZE) {
-			y = -1;  // Set to -1 if out of bounds
+			y = -1;
 		}
 
         vector2 newPos = new_vector2(x, y);
 
         if (isValidMove(pos, newPos, true) && y != -1 && x != -1) {
-            movePiece(piece, newPos);
+			if (!equals(getKingPosition(), selected_piece)) {
+				if (!isInCheck(newPos)) {
+					if (exposesKingToCheck(newPos)) {
+						printf("Invalid move. Exposes king to check.\n");
+					}
+					else {
+						movePiece(piece, newPos, false);
+						turn = turn == 'w' ? 'b' : 'w';
+					}
+				}
+				else printf("Invalid move. You are in check.\n");
+			}
+			else {
+				if (exposesKingToCheck(newPos)) {
+					printf("Invalid move. Exposes king to check.\n");
+				}
+				else {
+					movePiece(piece, newPos, false);
+					turn = turn == 'w' ? 'b' : 'w';
+				}
+			}
         } else {
             printf("Invalid move.\n");
         }
 
 		selected_piece = (vector2) {-1, -1};
+
 		hideMoves();
         displayBoard();
     }

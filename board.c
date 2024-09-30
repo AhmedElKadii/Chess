@@ -73,11 +73,25 @@ Piece* getPieceAsPointer(vector2 pos) {
     return &board[pos.x][pos.y]; // x first, then y
 }
 
+int getValidMoves(Piece piece) {
+	int count = 0;
+	for (int y = 0; y < SIZE; y++) {
+		for (int x = 0; x < SIZE; x++) {
+			vector2 pos = {x, y};
+
+			if (isValidMove(piece.position, pos, false)) {
+				count++;
+			}
+		}
+	}
+	return count;
+}
+
 void capturePiece(Piece piece) {
     board[piece.position.x][piece.position.y] = createPiece(' ', ' ', piece.position.x, piece.position.y);
 }
 
-void movePiece(Piece piece, vector2 pos) {
+void movePiece(Piece piece, vector2 pos, bool isTemp) {
 	capturePiece(piece);
 
     int xDiff = pos.x - piece.position.x;
@@ -88,17 +102,27 @@ void movePiece(Piece piece, vector2 pos) {
 
 	int Diff = xDiff == yDiff ? xDiff : xDiff != 0 ? xDiff : yDiff;
 
-	if (lastMovedPiece != NULL) lastMovedPiece->lastMove = 0;
-	lastMovedPiece = &piece;
-
-    piece.totalMoves += abs(Diff);
-    piece.lastMove = abs(Diff);
+	if (!isTemp) {
+		piece.totalMoves += abs(Diff);
+		piece.lastMove = abs(Diff);
+	}
 
     board[pos.x][pos.y] = piece;
+
+	if (isTemp) return;
+
+	if (lastMovedPiece != NULL) {
+		printf("Last move: %d\n", lastMovedPiece->lastMove);
+		printf("Last moved piece: %c\n", lastMovedPiece->name);
+		lastMovedPiece->lastMove = 0;
+	}
+
+	lastMovedPiece = getPieceAsPointer(pos);
 }
 
 void init() {
 	selected_piece = (vector2) {-1,-1};
     createBoard();
     displayBoard();
+	turn = FIRST_TO_PLAY;
 }
