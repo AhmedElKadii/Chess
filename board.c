@@ -1,39 +1,27 @@
-#include <stdio.h>
-
 #include "board.h"
-#include "move_validation.h"
-#include "piece.h"
 
-void createBoard() {
-    board[0][7] = createPiece('r', 'w', 0, 7);
-    board[1][7] = createPiece('n', 'w', 1, 7);
-    board[2][7] = createPiece('b', 'w', 2, 7);
-    board[3][7] = createPiece('q', 'w', 3, 7);
-    board[4][7] = createPiece('k', 'w', 4, 7);
-    board[5][7] = createPiece('b', 'w', 5, 7);
-    board[6][7] = createPiece('n', 'w', 6, 7);
-    board[7][7] = createPiece('r', 'w', 7, 7);
-    for (int i = 0; i < SIZE; i++) {
-        board[i][6] = createPiece('p', 'w', i, 6);
-    }
+void setCustomBoard(char customMap[SIZE][SIZE]) {
+    for (int y = 0; y < SIZE; y++) {  // Use y before x for consistency
+        for (int x = 0; x < SIZE; x++) {
+            char pieceType = customMap[y][x];  // Use customMap[y][x] for correct order
+            char color = ' ';
 
-    for (int i = 2; i < 6; i++) {
-        for (int j = 0; j < SIZE; j++) {
-            board[j][i] = createPiece(' ', ' ', j, i); // use x, y
+            // Set color based on the piece type ('w' for white, 'b' for black)
+            if (pieceType >= 'A' && pieceType <= 'Z') {
+                color = 'b';  // Capital letters represent black pieces
+            } else if (pieceType >= 'a' && pieceType <= 'z') {
+                color = 'w';  // Lowercase letters represent white pieces
+            }
+
+            // Create a piece for each position on the board
+            board[x][y] = createPiece(tolower(pieceType), color, x, y);  // Ensure coordinates are x, y
         }
     }
+}
 
-    board[0][0] = createPiece('r', 'b', 0, 0);
-    board[1][0] = createPiece('n', 'b', 1, 0);
-    board[2][0] = createPiece('b', 'b', 2, 0);
-    board[3][0] = createPiece('q', 'b', 3, 0);
-    board[4][0] = createPiece('k', 'b', 4, 0);
-    board[5][0] = createPiece('b', 'b', 5, 0);
-    board[6][0] = createPiece('n', 'b', 6, 0);
-    board[7][0] = createPiece('r', 'b', 7, 0);
-    for (int i = 0; i < SIZE; i++) {
-        board[i][1] = createPiece('p', 'b', i, 1);
-    }
+void createBoard() {
+    char defaultBoard[SIZE][SIZE] = SELECTED_BOARD;
+    setCustomBoard(defaultBoard);
 }
 
 void displayBoard() {
@@ -41,23 +29,29 @@ void displayBoard() {
     for (int y = 0; y < SIZE; y++) {
         printf("%d ", SIZE - y);
         for (int x = 0; x < SIZE; x++) {
-			if (!isEmpty(board[x][y]) && board[x][y].color == 'w') {
-				if (equals((vector2) {x,y}, selected_piece) && HIGHLIGHT) {
-					printf("\033[033m%c \033[0m", board[x][y].name);
-				} else if (board[x][y].isValidMove && HIGHLIGHT) {
-					printf("\033[032m%c \033[0m", board[x][y].name);
-				} else printf("%c ", board[x][y].name);
+            if (!isEmpty(board[x][y]) && board[x][y].color == 'w') {
+                // Highlight or print white pieces
+                if (equals((vector2){x, y}, selected_piece) && HIGHLIGHT) {
+                    printf("\033[033m%c \033[0m", board[x][y].name);  // Highlight white piece
+                } else if (board[x][y].isValidMove && HIGHLIGHT) {
+                    printf("\033[032m%c \033[0m", board[x][y].name);  // Valid move highlighting
+                } else {
+                    printf("%c ", board[x][y].name);  // Regular white piece display
+                }
             } else if (!isEmpty(board[x][y]) && board[x][y].color == 'b') {
-				if (equals((vector2) {x,y}, selected_piece) && HIGHLIGHT) {
-					printf("\033[033m%c \033[0m", toupper(board[x][y].name));
-				} else if (board[x][y].isValidMove && HIGHLIGHT) {
-					printf("\033[032m%c \033[0m", toupper(board[x][y].name));
-				} else printf("%c ", toupper(board[x][y].name));
-			} else if (isEmpty(board[x][y]) && board[x][y].isValidMove && SHOW_MOVES) {
-				if (HIGHLIGHT)	printf("\033[33m* \033[0m");
-				else	printf("* ");
+                // Highlight or print black pieces
+                if (equals((vector2){x, y}, selected_piece) && HIGHLIGHT) {
+                    printf("\033[033m%c \033[0m", toupper(board[x][y].name));  // Highlight black piece
+                } else if (board[x][y].isValidMove && HIGHLIGHT) {
+                    printf("\033[032m%c \033[0m", toupper(board[x][y].name));  // Valid move highlighting
+                } else {
+                    printf("%c ", toupper(board[x][y].name));  // Regular black piece display
+                }
+            } else if (isEmpty(board[x][y]) && board[x][y].isValidMove && SHOW_MOVES) {
+                if (HIGHLIGHT) printf("\033[33m* \033[0m");  // Highlight empty square
+                else printf("* ");
             } else {
-                printf("  ");
+                printf("  ");  // Print empty square
             }
         }
         printf("\n");

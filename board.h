@@ -1,6 +1,9 @@
-#include "settings.h"
+#include <stdio.h>
 
+#include "settings.h"
 #include "piece.h"
+#include "custom_boards.h"
+#include "move_validation.h"
 
 vector2 selected_piece;
 Piece board[SIZE][SIZE];

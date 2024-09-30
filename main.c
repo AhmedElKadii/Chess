@@ -6,6 +6,10 @@
 void gameLoop() {
     char move[3];
     while (1) {
+		if (isInMate()) {
+			printf("Checkmate! %s wins.\n", turn == 'w' ? "Black" : "White");
+			break;
+		}
         printf("\nEnter your move, %s (e.g., E2, d5): ", turn == 'w' ? "White" : "Black");
         scanf("%s", move);
 
@@ -24,7 +28,8 @@ void gameLoop() {
         Piece piece = getPiece(pos);
 
         if (!isEmpty(piece) && y != -1 && x != -1) {
-			if (piece.color == turn) printf("\nPiece at position: %c\n", piece.name); else {
+			if (piece.color == turn) printf("\nPiece at position: %c\n", piece.name);
+			else {
 				printf("\nInvalid move. It's not your turn.\n");
 				continue;
 			}
@@ -58,7 +63,7 @@ void gameLoop() {
 
         if (isValidMove(pos, newPos, true) && y != -1 && x != -1) {
 			if (!equals(getKingPosition(), selected_piece)) {
-				if (!isInCheck(newPos)) {
+				if (!isInCheck()) {
 					if (exposesKingToCheck(newPos)) {
 						printf("Invalid move. Exposes king to check.\n");
 					}
