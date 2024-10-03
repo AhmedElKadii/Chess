@@ -10,6 +10,10 @@ void gameLoop() {
 			printf("Checkmate! %s wins.\n", turn == 'w' ? "Black" : "White");
 			break;
 		}
+
+		printf("isInMate: %d\n", isInMate());
+		printf("isInCheck: %d\n", isInCheck());
+
         printf("\nEnter your move, %s (e.g., E2, d5): ", turn == 'w' ? "White" : "Black");
         scanf("%s", move);
 
@@ -31,16 +35,20 @@ void gameLoop() {
 			if (piece.color == turn) printf("\nPiece at position: %c\n", piece.name);
 			else {
 				printf("\nInvalid move. It's not your turn.\n");
+				selected_piece = (vector2) {-1, -1};
+				is_piece_selected = false;
 				continue;
 			}
         } else {
 			resetValidity();
 			selected_piece = (vector2) {-1, -1};
+			is_piece_selected = false;
             printf("\nNo piece at the specified position.\n");
 			continue;
         }
 
 		selected_piece = pos;
+		is_piece_selected = true;
 
 		displayMoves(piece);
 		displayBoard();
@@ -87,10 +95,11 @@ void gameLoop() {
             printf("Invalid move.\n");
         }
 
-		selected_piece = (vector2) {-1, -1};
-
 		hideMoves();
         displayBoard();
+		resetValidity();
+		selected_piece = (vector2) {-1, -1};
+		is_piece_selected = false;
     }
 }
 

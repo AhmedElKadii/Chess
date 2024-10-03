@@ -1,5 +1,6 @@
 #include "move_validation.h"
 #include "board.h"
+#include "check_validation.h"
 
 bool isEmpty(Piece piece) {
 	return piece.name == ' ';
@@ -167,14 +168,20 @@ bool validateQueen(Piece piece, Piece dest) {
 }
 
 bool validateKnight(Piece piece, Piece dest) {
-	if (abs(piece.position.x - dest.position.x) == 2 && abs(piece.position.y - dest.position.y) == 1) return canCapture(piece, dest);
-	if (abs(piece.position.x - dest.position.x) == 1 && abs(piece.position.y - dest.position.y) == 2) return canCapture(piece, dest);
+	if (abs(piece.position.x - dest.position.x) == 2 
+			&& abs(piece.position.y - dest.position.y) == 1) return canCapture(piece, dest);
+	if (abs(piece.position.x - dest.position.x) == 1 
+			&& abs(piece.position.y - dest.position.y) == 2) return canCapture(piece, dest);
 	return false;
 }
 
-bool validateKing(Piece piece, Piece dest) {
-	if (abs(piece.position.x - dest.position.x) <= 1 && abs(piece.position.y - dest.position.y) <= 1) return canCapture(piece, dest);
-	return false;
+bool validateKing(Piece king, Piece dest) {
+    if (abs(king.position.x - dest.position.x) <= 1
+			&& abs(king.position.y - dest.position.y) <= 1
+			&& !exposesKingToCheck(dest.position)) {
+        return canCapture(king, dest);
+    }
+    return false;
 }
 
 void resetValidity() {

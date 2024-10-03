@@ -6,6 +6,7 @@
 #include "move_validation.h"
 
 vector2 selected_piece;
+bool is_piece_selected;
 Piece board[SIZE][SIZE];
 Piece* lastMovedPiece;
 char turn;
