@@ -1,9 +1,11 @@
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+#include "settings.h"
 
 // Struct for a 2D vector
 typedef struct {

@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "main.h"
 #include "board.h"
 
@@ -7,14 +5,20 @@ void gameLoop() {
     char move[3];
     while (1) {
 		if (isInMate()) {
-			printf("Checkmate! %s wins.\n", turn == 'w' ? "Black" : "White");
+			char turn_str[10];
+			sprintf(turn_str, "%s", turn == 'w' ? "White" : "Black");
+			pim(&queue, strcat("Checkmate! %s wins.", turn_str), false);
 			break;
 		}
 
-		printf("isInMate: %d\n", isInMate());
-		printf("isInCheck: %d\n", isInCheck());
+		char turn_str[10];
+		char prompt[100];
 
-        printf("\nEnter your move, %s (e.g., E2, d5): ", turn == 'w' ? "White" : "Black");
+		sprintf(turn_str, "%s", turn == 'w' ? "White" : "Black");
+
+		sprintf(prompt, "Enter your move, %s (e.g., E2, d5): ", turn_str);
+
+		pim(&queue, prompt, false);
         scanf("%s", move);
 
 		int x = tolower(move[0]) - 'a';
@@ -32,9 +36,13 @@ void gameLoop() {
         Piece piece = getPiece(pos);
 
         if (!isEmpty(piece) && y != -1 && x != -1) {
-			if (piece.color == turn) printf("\nPiece at position: %c\n", piece.name);
+			char buffer[100];
+
+			sprintf(buffer, "piece at position: %c", piece.name);
+
+			if (piece.color == turn) pim(&queue, buffer, false);
 			else {
-				printf("\nInvalid move. It's not your turn.\n");
+				pim(&queue, "Invalid move. It's not your turn.", true);
 				selected_piece = (vector2) {-1, -1};
 				is_piece_selected = false;
 				continue;
@@ -43,7 +51,7 @@ void gameLoop() {
 			resetValidity();
 			selected_piece = (vector2) {-1, -1};
 			is_piece_selected = false;
-            printf("\nNo piece at the specified position.\n");
+			pim(&queue, "No piece at the specified position.\n", true);
 			continue;
         }
 
@@ -53,7 +61,7 @@ void gameLoop() {
 		displayMoves(piece);
 		displayBoard();
 
-        printf("Enter destination: ");
+		pim(&queue, "Enter destination: ", false);
         scanf("%s", move);
 
         x = tolower(move[0]) - 'a';
@@ -73,18 +81,18 @@ void gameLoop() {
 			if (!equals(getKingPosition(), selected_piece)) {
 				if (!isInCheck()) {
 					if (exposesKingToCheck(newPos)) {
-						printf("Invalid move. Exposes king to check.\n");
+						pim(&queue, "Invalid move. Exposes king to check.", true);
 					}
 					else {
 						movePiece(piece, newPos, false);
 						turn = turn == 'w' ? 'b' : 'w';
 					}
 				}
-				else printf("Invalid move. You are in check.\n");
+				else pim(&queue, "Invalid move. King is in check.", true);
 			}
 			else {
 				if (exposesKingToCheck(newPos)) {
-					printf("Invalid move. Exposes king to check.\n");
+					pim(&queue, "Invalid move. Exposes king to check.", true);
 				}
 				else {
 					movePiece(piece, newPos, false);
@@ -92,7 +100,7 @@ void gameLoop() {
 				}
 			}
         } else {
-            printf("Invalid move.\n");
+			pim(&queue, "Invalid move. Try again.", true);
         }
 
 		hideMoves();

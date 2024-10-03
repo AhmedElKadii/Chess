@@ -101,18 +101,16 @@ void movePiece(Piece piece, vector2 pos, bool isTemp) {
 
 	if (isTemp) return;
 
-	if (lastMovedPiece != NULL) {
-		printf("Last move: %d\n", lastMovedPiece->lastMove);
-		printf("Last moved piece: %c\n", lastMovedPiece->name);
-		lastMovedPiece->lastMove = 0;
-	}
+	if (lastMovedPiece != NULL) { lastMovedPiece->lastMove = 0; }
 
 	lastMovedPiece = getPieceAsPointer(pos);
 }
 
 void init() {
+	lastMovedPiece = NULL;
 	selected_piece = (vector2) {-1,-1};
 	is_piece_selected = false;
+	init_message_queue(&queue);
     createBoard();
     displayBoard();
 	turn = FIRST_TO_PLAY;

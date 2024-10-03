@@ -21,7 +21,7 @@ bool isInCheck() {
 			if (board[x][y].name != 'k' && board[x][y].color != turn && getValidMoves(board[x][y]) > 0) {
 				vector2 piecePos = new_vector2(x, y);
 				if (isValidMove(piecePos, kingPos, false)) {
-					printf("King is in check\n");
+					pim(&queue, "King is in check\n", true);
 					return true;
 				}
 			}

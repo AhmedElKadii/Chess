@@ -4,12 +4,17 @@
 #include "piece.h"
 #include "custom_boards.h"
 #include "move_validation.h"
+#include "message_handler.h"
 
-vector2 selected_piece;
-bool is_piece_selected;
 Piece board[SIZE][SIZE];
 Piece* lastMovedPiece;
+
+////////GLOBALS////////
+vector2 selected_piece;
+bool is_piece_selected;
 char turn;
+message_queue queue;
+///////////////////////
 
 void createBoard();
 void displayBoard();
