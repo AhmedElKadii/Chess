@@ -1,6 +1,3 @@
-#ifndef PIECE_H
-#define PIECE_H
-
 #include "structs.h"
 
 typedef struct {
@@ -13,5 +10,5 @@ typedef struct {
 } Piece;
 
 Piece createPiece(char name, char color, int x, int y);
-
-#endif
+void promotePiece(Piece *piece, char name);
+bool shouldPromote(Piece piece);

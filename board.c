@@ -23,6 +23,7 @@ void createBoard() {
 }
 
 void displayBoard() {
+	printf("\n");
     printf("\n  a b c d e f g h\n");
     for (int y = 0; y < SIZE; y++) {
         printf("%d ", SIZE - y);
@@ -52,7 +53,6 @@ void displayBoard() {
         }
         printf("\n");
     }
-    printf("\n");
 }
 
 Piece getPiece(vector2 pos) {
@@ -64,13 +64,41 @@ Piece* getPieceAsPointer(vector2 pos) {
 }
 
 int getValidMoves(Piece piece) {
+	validating = true;
 	int count = 0;
 	for (int y = 0; y < SIZE; y++) {
 		for (int x = 0; x < SIZE; x++) {
 			vector2 pos = {x, y};
 
-			if (isValidMove(piece.position, pos, false)) {
+			if (isValidMove(piece.position, pos, false) && !isInCheck() && !exposesKingToCheck(pos)) {
 				count++;
+			}
+		}
+	}
+
+	return count;
+}
+
+int calculateValidMoves() {
+	int count = 0;
+	for (int y = 0; y < SIZE; y++) {
+		for (int x = 0; x < SIZE; x++) {
+			Piece piece = getPiece((vector2) {x, y});
+
+			/*printf("Piece: %c\nColor: %c", piece.name, piece.color);*/
+
+			if (piece.name == 'k'
+					|| isEmpty(piece)
+					|| piece.color != turn) continue;
+			
+			for (int j = 0; j < SIZE; j++) {
+				for (int i = 0; i < SIZE; i++) {
+					vector2 pos = {i, j};
+
+					if (isValidMove(piece.position, pos, false)) {
+						count++;
+					}
+				}
 			}
 		}
 	}
@@ -99,6 +127,19 @@ void movePiece(Piece piece, vector2 pos, bool isTemp) {
 
     board[pos.x][pos.y] = piece;
 
+	if (
+		piece.name == 'k'
+		&& piece.totalMoves == 0
+		&& getPiece((vector2) {pos.x+1, pos.y}).name == 'r'
+		&& getPiece((vector2) {pos.x+1, pos.y}).totalMoves == 0
+	) movePiece(getPiece((vector2) {pos.x+1, pos.y}), (vector2) {pos.x-1, pos.y}, false);
+	if (
+		piece.name == 'k'
+		&& piece.totalMoves == 0
+		&& getPiece((vector2) {pos.x-2, pos.y}).name == 'r'
+		&& getPiece((vector2) {pos.x-2, pos.y}).totalMoves == 0
+	) movePiece(getPiece((vector2) {pos.x-2, pos.y}), (vector2) {pos.x+1, pos.y}, false);
+
 	if (isTemp) return;
 
 	if (lastMovedPiece != NULL) { lastMovedPiece->lastMove = 0; }
@@ -113,5 +154,6 @@ void init() {
 	init_message_queue(&queue);
     createBoard();
     displayBoard();
+	lastCapture = 0;
 	turn = FIRST_TO_PLAY;
 }

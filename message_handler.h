@@ -8,7 +8,7 @@
 
 typedef struct {
 	char text[100];
-	bool is_error;
+	char type;
 } message;
 
 typedef struct {
@@ -19,7 +19,7 @@ typedef struct {
 } message_queue;
 
 void init_message_queue(message_queue *queue);
-bool enqueue(message_queue *queue, const char *text, bool is_error);
+bool enqueue(message_queue *queue, const char *text, char type);
 bool dequeue(message_queue *queue, message *msg);
-void pim(message_queue *queue, const char *text, bool is_error);
+void pim(message_queue *queue, const char *text, char type);
 void process_messages(message_queue *queue);

@@ -4,6 +4,7 @@
 #include "piece.h"
 #include "custom_boards.h"
 #include "move_validation.h"
+#include "check_validation.h"
 #include "message_handler.h"
 
 Piece board[SIZE][SIZE];
@@ -14,6 +15,8 @@ vector2 selected_piece;
 bool is_piece_selected;
 char turn;
 message_queue queue;
+bool validating;
+int lastCapture;
 ///////////////////////
 
 void createBoard();
@@ -21,6 +24,7 @@ void displayBoard();
 Piece getPiece(vector2 pos);
 Piece* getPieceAsPointer(vector2 pos);
 int getValidMoves(Piece piece);
+int calculateValidMoves();
 void capturePiece(Piece piece);
 void movePiece(Piece piece, vector2 pos, bool isTemp);
 void init();
